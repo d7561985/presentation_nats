@@ -1,0 +1,8 @@
+@import 'https://fonts.googleapis.com/css?family=Baloo+Bhai';
+
+ul {
+  flex: 1;
+  font-size: 0.6em;
+  line-height: 1;
+  text-decoration: none;
+}

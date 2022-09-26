@@ -1,0 +1,27 @@
+= NATS presentation
+
+== Setup
+* https://docs.asciidoctor.org/reveal.js-converter/latest/setup/node-js-setup/
+* https://github.com/asciidoctor/asciidoctor-reveal.js/tree/master/examples
+
+[souce,bash]
+----
+npm init -y
+npm i --save asciidoctor @asciidoctor/reveal.js
+----
+
+== Run
+[source,bash]
+----
+npx asciidoctor-revealjs presentation.adoc
+----
+
+
+==  Agenda preliminary
+- Nats.(5 min)
+- Global nats mesh.(3 min)
+- Infrastructure.(3 min)
+- Conventions. (2 min)
+- GO development guideline (7 min)
+- Service deployment + gitops. (5 min)
+- Event driven architecture. (<5 min)

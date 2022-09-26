@@ -1,0 +1,351 @@
+= NATS events and beyond
+:revdate: 2022-09-26
+:imagesdir: images
+//:title-slide-transition: zoom
+:title-slide-transition-speed: fast
+//:customcss: fragments.css
+:revealjs_hash: true
+:revealjs_center: false
+:revealjs_height: 1080
+:revealjs_width: 1920
+:icons: font
+:font-awesome-version: 5.14.0
+:revealjs_controls: true
+:revealjs_controlsTutorial: true
+:revealjs_totalTime: 2700
+
+Introduction for developers
+
+by Harupa Dzmitry <d.harupa@pin-up.team>
+
+@2022
+
+== About
+Something about me
+
+== Agenda
+
+- NATS.(5 min)
+* Subject-Based Messaging
+* Core
+* JetStream
+- Pin-Up Infrastructure.(3 min)
+- Development
+* QoS patterns
+* D2
+- Conventions. (2 min)
+* GO development guideline (7 min)
+* Service deployment + gitops. (5 min)
+- Event driven architecture. (<5 min)
+
+== NATS
+> message oriented middleware
+
+[NOTE]
+.With NATS, application developers can
+====
+* Effortlessly build distributed and scalable client-server applications.
+* Store and distribute data in realtime in a general manner. This can flexibly be achieved across various environments, languages, cloud providers and on-premises systems.
+====
+
+[NOTE.speaker]
+--
+Сами разработчики называют NATS: `сообщения-ориентированным посредником`
+
+* Возможно разрабатывать без особого труда распределенные и масштабируемые клиент-сервер приложения
+* Хранить и распространять данные в реальном времени в общем виде
+--
+
+=== Features
+
+* At-least-once delivery and exactly once within a window
+* Store data and replay by time or sequence
+* Wildcard support
+* NATS 2.0 Security aware
+* Data at rest encryption (Version 2.2.3)
+* Cleanse specific messages (General Data Protection Regulation: GDPR)
+* Horizontal scalability
+* Persist Streams and replay via Consumers
+
+=== Quality of service (QoS) footnote:[https://docs.nats.io/nats-concepts/what-is-nats] footnote:[https://developers.cloudflare.com/pub-sub/learning/delivery-guarantees]
+
+A.K.A: Delivery guarantees or “delivery modes”
+
+https://docs.nats.io/nats-concepts/overview/compare-nats[NATS comparison]
+
+Developer should be aware about quality of delivery between NATS components to achieve desired goal.
+
+[cols=3,frame=sides,options=header]
+|===
+| QoS
+| NATS component
+| Better for
+
+| At most once, QoS(0)
+| Core NATS
+| Inviable data, events quickly superseded or high rate messaging
+
+| At-least, QoS(1)
+| JetStream (Stream+Consumer configuration)
+| Transaction processing, most forms of chat messaging, and remote command processing
+
+| Exactly once, QoS(2)
+| JetStream: Producer: Message Deduplication Consumer: double ask
+| Subscribers must receive the message only once.
+
+|===
+
+Also always build additional reliability into your client applications yourself with proven and scalable reference designs such as acks and sequence numbers.
+
+[.notes]
+--
+[NOTE]
+Определяет как сильно MQ обрабатывает доставку сообщений. Каждый уровень гарантии это своеобразный компромис между скоростью и уверенностью в обработанном сообщении.
+С каждым уровнем система требует больших проверкок и подтверждений для гарантии, что сообщение было обработано.
+Что влияет на пропусную способность.
+
+Понимание гарантии доставки крайне важные при проектировани IPC. И может выбирать между пропускной способность или гарантией отправки сообщения.
+
+WARNING: Команда разработчиков должна понимать разницу и уметь правильно выбрать необходимый уровень качества доставки.
+
+Для принятия решения важно анализировать бизнес требования функционала:
+
+1. Насколько ценно сообщение?
+2. Можем мы его потерять?
+3. Что делать когда сообщение было утеряно?
+4. Каие действия при системных ошибках следует предпринимать отправителю и/или подписчику?
+
+.At most once (QoS 0)
+В лучшем случае - отправит. Клиент не может знать хоть кто-то прочитает сообщение или нет! Еще называется “best-effort”
+
+Если никто не слушает subject или не активен в момент отправки сообщения - сообщение не будет доставлено.
+
+Такой же уровень гарантии предоставляет TCP/IP.
+
+Ядро отправляет и забывает сообщение. Он держит сообщения только в памяти и никогда не сохраняет их на диск.
+
+Обладает высокой пропускной способностью, т.к. накладные расходы это пропускная способность сети и CPU системы.
+
+.At-least once (QoS 1)
+Клиент получает гарантию, что его сообщение будет сохранено.
+На этом уровне гарантии клиент получает больше возможностей для отслеживания состояния его сообщения: если сообщение не будет отправлено он будет знать, что сообщение не было сохранено в стрим стор и нужно предпринять меры.
+
+
+
+.exactly once QoS (QoS 2)
+Ideal when message rates are fairly low and where latency is not a primary concern.
+
+--
+
+[.columns]
+=== Components
+
+[.column]
+--
+.Functionality
+
+* Core
+* JetStream
+--
+
+[.column]
+.Protocol
+--
+* NATS
+* MQTT footnote:MQTT[https://docs.nats.io/running-a-nats-service/configuration/mqtt]
+* WebSocket footnote:WebSocket[https://docs.nats.io/running-a-nats-service/configuration/websocket]
+--
+
+[.column]
+.Topology
+--
+* Single
+* Cluster footnote:Cluster[https://docs.nats.io/running-a-nats-service/configuration/clustering]
+* Gateway footnote:Gatewat[https://docs.nats.io/running-a-nats-service/configuration/gateways]
+* Leaf footnote:Leaf[https://docs.nats.io/running-a-nats-service/configuration/leafnodes]
+--
+
+[.column]
+.Security footnote:Authentication[https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro]
+--
+* Token
+* User/Password
+* TLS auth
+* NKeys
+* JWT
+--
+
+[.notes]
+--
+.Топологя
+Как способ разворачивания, может быть развернута как `single node`, что не HA, в режиме кластера, сурер-кластер GateWay и Leaf протокол, который мы выбрали для построения нашего супер-кластера.
+
+* Single - исключительно дев. окружение самого разработчика
+* Cluster - HA deployment, обычно с 3я нодами, повышает доступность и пропускную способность
+* Gateway - обьединяет несколько кластеров в полную сетку. Кластеры используются для обьединения node, в то время GW - для обьединения кластеров. Это LoadBalancer!!!
+* Leaf - расширяет существующую NATS систему в любом размере. Прозрачно перенаправляют сообщения с локальных клиентво к одной или больше удаленным системам и обратно.
+
+.Безопасность
+Важно понимать разницу между аккаунт и пользователь. Аккаунт - это просто субсет пользователей с рязом высокоуровневых различий.
+
+> Accounts allow the grouping of clients, isolating them from clients in other accounts, thus enabling multi-tenancy in the server. With accounts, the subject space is not globally shared, greatly simplifying the messaging environment. Instead of devising complicated subject name carving patterns, clients can use short subjects without explicit authorization rules. System Events are an example of this isolation at work.
+
+Аккаунт строго разделяется на системный и обычный. Так же аккаунт обязательно должен иметь включенную опцию *jetstream*, без нее все пользователи будут использовать только CORE функционал
+
+IMPORTANT: Jetstream аккаунт не может быть системным.
+
+У нас принята конвенция использовать 2 вида аккаунтов: `SYS` и `ACC`
+
+Про методы аутентификации:
+
+.Token
+Это единый токен для подключения. Для авторизации используется поле `user` у пользователя нет ограничений, но он принадлежит не системному аккаунту.
+
+.User/Password
+Тут все просто. Это очень удобный механизм, т.к. позволяет легко настраивать права выбранных пользователей. Каждый пользователь может быть изолирован даже по типу подключения:
+
+.TLS auth
+Клиент предоставляет сертификат подписанный рутовым сертификатом установленным конкретному кластеру. Мапинг пользователей осуществялется через данные указанные при регистрации пользователя.
+
+> Subject Alternative Name (SAN) maps to a user. It will search all email addresses first, then all DNS names. If no user could be found, it will try the certificate subject.
+
+[source,yaml]
+----
+Certificate:
+...
+        X509v3 extensions:
+            X509v3 Subject Alternative Name:
+                DNS:localhost, IP Address:0:0:0:0:0:0:0:1, email:email@localhost
+            X509v3 Extended Key Usage:
+                TLS Web Client Authentication
+...
+----
+
+Можно использовать RFC 2253 Distinguished Names (распределенные имена)  синтаксис описать пользователя относящегося с предметом сервтификата
+[source,yaml]
+----
+authorization {
+  users = [
+    {user: "OU=testuser@MacBook-Pro.local (Test User),O=mkcert development certificate"}
+  ]
+}
+----
+
+.NKeys
+Современная система публичной сигнатуры ключа основанной на Ed25519. Позволяет идентифицировать пользователя без хранения или видения приватного ключа.
+
+Настраивается намного легче, т.к. на сервере мы указываем публичный хэш ключа и далее его уже привязываем к группе прав.
+
+Тут по прежнему нам нужен приватный ключ для клиента, но на стороне сервера - только приватный ключ, что упрощает обслуживание.
+
+.JWT
+Открытый стандарт RFC7519 метод для безопасного предоставления запросов между двумя распределенными частями.
+
+Подпись осуществляется через Ed25519 алгоритм. Все `Issuer` и `Subject` поля ключи - публичные NKEY которые.
+
+`Issuer` и `Subject` - залинкованы на  следующие роли:
+
+* Operators
+* Accounts
+* Users
+
+
+
+--
+
+== Core
+
+[.notes]
+****
+Я хочу сразу оговорить, что есть CORE функционал, и комьюнити
+С JetStream появилось несколько особенностей архитектуры, с которой многие разработчики путаются.
+
+Важно понимать, что JetStream расширяет возможности NATS новым функционалом и это решать разработчику, какой именно механизм ему стоит исползовать.
+****
+
+== JetStream
+
+> NATS has a built-in distributed persistence system called JetStream which enables new functionalities and higher qualities of service on top of the base 'Core NATS' functionalities and qualities of service.
+
+JetStream is designed to bifurcate ingestion and consumption of messages to provide multiple ways to consume data from the same stream. To that end, JetStream functionality is composed of server streams that hold data and server consumers that provide a way for applications to access data. Streams and consumers may be provisioned ahead of time, at runtime, and are independently configured to provide the flexibility to balance performance and reliability and create the perfect environment for your business needs.
+
+
+image::streams-and-consumers-75p.png[]
+
+=== Goals footnote:[A footnote on introduction?!]
+JetStream was developed with the following goals in mind
+
+[%step]
+* The system must be easy to configure and operate and be observable.
+* The system must be secure and operate well with NATS 2.0 security models.
+* The system must scale horizontally and be applicable to a high ingestion rate.
+* The system must support multiple use cases.
+* The system must self-heal and always be available.
+* The system must have an API that is closer to core NATS.
+* The system must allow NATS messages to be part of a stream as desired.
+* The system must display payload agnostic behavior.
+* The system must not have third party dependencies.
+
+[.columns.wrap]
+=== RAFT footnote:[https://docs.nats.io/running-a-nats-service/configuration/clustering/jetstream_clustering] footnote:[https://raft.github.io/]
+[.column.is-one-third.has-text-justified]
+--
+*Meta Group* - all servers join the Meta Group and the JetStream API is managed by this group. A leader is elected and this owns the API and takes care of server placement.
+--
+
+[.column.is-one-third.has-text-justified]
+--
+*Stream Group* - each Stream creates a RAFT group, this group synchronizes state and data between its members. The elected leader handles ACKs and so forth, if there is no leader the stream will not accept messages.
+--
+
+[.column.is-one-third.has-text-justified]
+--
+*Consumer Group* - each Consumer creates a RAFT group, this group synchronizes consumer state between its members. The group will live on the machines where the Stream Group is and handle consumption ACKs etc. Each Consumer will have their own group.
+--
+
+[.column.is-one-third]
+--
+image::meta_group.png[ width=40%]
+--
+
+[.column.is-one-third]
+--
+image::stream_group.png[ width=40%]
+--
+
+[.column.is-one-third]
+--
+image::consumer_group.png[ width=40%]
+--
+
+== What expect next?
+
+=== Release 2.9 footnote:[https://nats.io/blog/nats-server-29-release]
+context
+
+=== Road map
+image::roadmap.png[]
+
+== Pin-Up Infrastructure
+image::NATS LEAF-DEV.png[]
+
+== References
+- https://github.com/nats-io/nats.docs/tree/master/running-a-nats-service/configuration[Nats.Docs]
+- https://nats.io/blog/building-scalable-microservices-with-nats/[Building Microservices with NATS]
+- https://docs.nats.io/nats-concepts/jetstream[JetStream], at  https://github.com/nats-io/nats.docs/blob/master/nats-concepts/jetstream/readme.md[Nats.Docs]
+- https://nats.io/blog/nats-whats-new-22/[NATS Server 2.2 Release]
+- https://nats.io/blog/nats-server-29-release/[NATS Server 2.9 Release]
+- https://www.youtube.com/watch?v=HwwvFeUHAyo&t=1s[Benchmark]
+- https://raft.github.io/[RAFT]
+
+== Contacts
+icon:envelope[size=lg] d.harupa@pin-up.team
+
+icon:envelope[size=lg] d7561985@gmail.com
+
+icon:github[size=lg] https://github.com/d7561985
+
+icon:linkedin[size=lg] https://linkedin.com/in/dzmitry-harupa-332131137
+
+icon:instagram[size=lg] dzmityinv
+
