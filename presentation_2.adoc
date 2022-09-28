@@ -1,0 +1,52 @@
+= NATS events and beyond
+:revdate: 2022-09-26
+:imagesdir: images
+//:title-slide-transition: zoom
+:title-slide-transition-speed: fast
+//:customcss: fragments.css
+:revealjs_hash: true
+:revealjs_center: false
+:revealjs_height: 1080
+:revealjs_width: 1920
+:icons: font
+:font-awesome-version: 5.14.0
+:revealjs_controls: true
+:revealjs_controlsTutorial: true
+:revealjs_totalTime: 2700
+
+Development with NATS
+
+by Harupa Dzmitry <d.harupa@pin-up.team>
+
+@2022
+
+== About
+Something about me
+
+== Agenda
+
+- Pin-Up Infrastructure.(3 min)
+- Development
+* QoS patterns
+* D2
+- Conventions. (2 min)
+* GO development guideline (7 min)
+* Service deployment + gitops. (5 min)
+- Event driven architecture. (<5 min)
+
+[autoslide=60000]
+
+== Pin-Up Infrastructure
+image::NATS LEAF-DEV.png[]
+
+== Contacts
+icon:envelope[size=lg] d.harupa@pin-up.team
+
+icon:envelope[size=lg] d7561985@gmail.com
+
+icon:github[size=lg] https://github.com/d7561985
+
+icon:linkedin[size=lg] https://linkedin.com/in/dzmitry-harupa-332131137
+
+icon:instagram[size=lg] dzmityinv
+

@@ -25,19 +25,17 @@ Something about me
 
 == Agenda
 
-- NATS.(5 min)
+- NATS
+* Overview
+* Quality of service
+- NATS concept
 * Subject-Based Messaging
 * Core
 * JetStream
-- Pin-Up Infrastructure.(3 min)
-- Development
-* QoS patterns
-* D2
-- Conventions. (2 min)
-* GO development guideline (7 min)
-* Service deployment + gitops. (5 min)
-- Event driven architecture. (<5 min)
+* Subject Mapping and Partitioning
+- Future of NATS
 
+[autoslide=60000]
 == NATS
 > message oriented middleware
 
@@ -56,124 +54,60 @@ Something about me
 * Хранить и распространять данные в реальном времени в общем виде
 --
 
-=== Features
+=== What do you use NATS for?
+You can use NATS to exchange information with and make requests to other applications. You can also use NATS to make your application into a distributed peer-to-peer application.
 
-* At-least-once delivery and exactly once within a window
-* Store data and replay by time or sequence
-* Wildcard support
-* NATS 2.0 Security aware
-* Data at rest encryption (Version 2.2.3)
-* Cleanse specific messages (General Data Protection Regulation: GDPR)
-* Horizontal scalability
-* Persist Streams and replay via Consumers
+At a high level your application can use NATS to:
 
-=== Quality of service (QoS) footnote:[https://docs.nats.io/nats-concepts/what-is-nats] footnote:[https://developers.cloudflare.com/pub-sub/learning/delivery-guarantees]
+* Send (Publish) information to other applications or instances of your application.
+* Receive (Subscribe) information (in real-time or whenever your application runs) from other applications or instances of your application.
+* Make a request to a server or the service provided by another application.
+* Store shared (consistent) state/data between other applications or instances of your application.
+* Be informed in real-time about any new data being sent, or any changes to the shared state/data.
 
-A.K.A: Delivery guarantees or “delivery modes”
+=== Don't worry
+* Who sends the information that you want to receive.
+* Who is interested in the information you are sending to others, or how many are interested or where they are.
+* Where the service you are sending a request to is located, or how many currently active instances of that service there are.
+* How many partitions or servers there are in the cluster.
+* Security (just identify yourself).
+* Whether your application is up and running at the time the information is sent or not (using JetStream).
+* Flow control (using JetStream)
+* Higher qualities of services such as exactly-once (using JetStream)
+* Fault-tolerance, and which servers are up or down at any given time.
+* The topology of the NATS server infrastructure or it is architected.
 
-https://docs.nats.io/nats-concepts/overview/compare-nats[NATS comparison]
+[autoslide=60000]
+== Overview
+* Functionality
+* Connectivity
+* Deployment Architectures
+* Security
 
-Developer should be aware about quality of delivery between NATS components to achieve desired goal.
-
-[cols=3,frame=sides,options=header]
-|===
-| QoS
-| NATS component
-| Better for
-
-| At most once, QoS(0)
-| Core NATS
-| Inviable data, events quickly superseded or high rate messaging
-
-| At-least, QoS(1)
-| JetStream (Stream+Consumer configuration)
-| Transaction processing, most forms of chat messaging, and remote command processing
-
-| Exactly once, QoS(2)
-| JetStream: Producer: Message Deduplication Consumer: double ask
-| Subscribers must receive the message only once.
-
-|===
-
-Also always build additional reliability into your client applications yourself with proven and scalable reference designs such as acks and sequence numbers.
-
-[.notes]
---
-[NOTE]
-Определяет как сильно MQ обрабатывает доставку сообщений. Каждый уровень гарантии это своеобразный компромис между скоростью и уверенностью в обработанном сообщении.
-С каждым уровнем система требует больших проверкок и подтверждений для гарантии, что сообщение было обработано.
-Что влияет на пропусную способность.
-
-Понимание гарантии доставки крайне важные при проектировани IPC. И может выбирать между пропускной способность или гарантией отправки сообщения.
-
-WARNING: Команда разработчиков должна понимать разницу и уметь правильно выбрать необходимый уровень качества доставки.
-
-Для принятия решения важно анализировать бизнес требования функционала:
-
-1. Насколько ценно сообщение?
-2. Можем мы его потерять?
-3. Что делать когда сообщение было утеряно?
-4. Каие действия при системных ошибках следует предпринимать отправителю и/или подписчику?
-
-.At most once (QoS 0)
-В лучшем случае - отправит. Клиент не может знать хоть кто-то прочитает сообщение или нет! Еще называется “best-effort”
-
-Если никто не слушает subject или не активен в момент отправки сообщения - сообщение не будет доставлено.
-
-Такой же уровень гарантии предоставляет TCP/IP.
-
-Ядро отправляет и забывает сообщение. Он держит сообщения только в памяти и никогда не сохраняет их на диск.
-
-Обладает высокой пропускной способностью, т.к. накладные расходы это пропускная способность сети и CPU системы.
-
-.At-least once (QoS 1)
-Клиент получает гарантию, что его сообщение будет сохранено.
-На этом уровне гарантии клиент получает больше возможностей для отслеживания состояния его сообщения: если сообщение не будет отправлено он будет знать, что сообщение не было сохранено в стрим стор и нужно предпринять меры.
-
-
-
-.exactly once QoS (QoS 2)
-Ideal when message rates are fairly low and where latency is not a primary concern.
-
---
-
-[.columns]
-=== Components
-
-[.column]
---
-.Functionality
+=== Functionality
 
 * Core
 * JetStream
+
+[.notes]
+--
+Ядро - базовый функционал, который изначально был разработал и за что мы все полюбили NATS
+
+Стриминг - новый функционал, который расширил возможности, дав нам альтернативу Apache Kafka, которую в первую очередь крайне легко поддерживать и обслуживать.
 --
 
-[.column]
-.Protocol
---
-* NATS
+=== Connectivity footnote:[https://docs.nats.io/nats-concepts/connectivity]
+
+* NATS plain
+* TLS encrypted NATS connections
 * MQTT footnote:MQTT[https://docs.nats.io/running-a-nats-service/configuration/mqtt]
 * WebSocket footnote:WebSocket[https://docs.nats.io/running-a-nats-service/configuration/websocket]
---
 
-[.column]
-.Topology
---
+=== Deployment Architectures footnote:[https://docs.nats.io/nats-concepts/service_infrastructure/adaptive_edge_deployment]
 * Single
 * Cluster footnote:Cluster[https://docs.nats.io/running-a-nats-service/configuration/clustering]
 * Gateway footnote:Gatewat[https://docs.nats.io/running-a-nats-service/configuration/gateways]
 * Leaf footnote:Leaf[https://docs.nats.io/running-a-nats-service/configuration/leafnodes]
---
-
-[.column]
-.Security footnote:Authentication[https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro]
---
-* Token
-* User/Password
-* TLS auth
-* NKeys
-* JWT
---
 
 [.notes]
 --
@@ -182,9 +116,20 @@ Ideal when message rates are fairly low and where latency is not a primary conce
 
 * Single - исключительно дев. окружение самого разработчика
 * Cluster - HA deployment, обычно с 3я нодами, повышает доступность и пропускную способность
-* Gateway - обьединяет несколько кластеров в полную сетку. Кластеры используются для обьединения node, в то время GW - для обьединения кластеров. Это LoadBalancer!!!
+* Gateway - обьединяет несколько кластеров в полную сетку. Кластеры используются для обьединения node, в то время GW - для обьединения кластеров.
 * Leaf - расширяет существующую NATS систему в любом размере. Прозрачно перенаправляют сообщения с локальных клиентво к одной или больше удаленным системам и обратно.
+--
 
+=== Security footnote:Authentication[https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro]
+
+* Token
+* User/Password
+* TLS auth
+* NKeys
+* JWT
+
+[.notes]
+--
 .Безопасность
 Важно понимать разницу между аккаунт и пользователь. Аккаунт - это просто субсет пользователей с рязом высокоуровневых различий.
 
@@ -248,20 +193,213 @@ authorization {
 * Operators
 * Accounts
 * Users
+--
 
+== Quality of service (QoS) footnote:[https://docs.nats.io/nats-concepts/what-is-nats] footnote:[https://developers.cloudflare.com/pub-sub/learning/delivery-guarantees]
 
+A.K.A: Delivery guarantees or “delivery modes”
 
+https://docs.nats.io/nats-concepts/overview/compare-nats[NATS comparison]
+
+Developer should be aware about quality of delivery between NATS components to achieve desired goal.
+
+[cols=3,frame=sides,options=header]
+|===
+| QoS
+| NATS component
+| Better for
+
+| At most once, QoS(0)
+| Core NATS
+| Inviable data, events quickly superseded or high rate messaging
+
+| At-least, QoS(1)
+| JetStream (Stream+Consumer configuration)
+| Transaction processing, most forms of chat messaging, and remote command processing
+
+| Exactly once, QoS(2)
+| JetStream: Producer: Message Deduplication Consumer: double ask
+| Subscribers must receive the message only once.
+
+|===
+
+Also always build additional reliability into your client applications yourself with proven and scalable reference designs such as acks and sequence numbers.
+
+[.notes]
+--
+[NOTE]
+Определяет как сильно MQ обрабатывает доставку сообщений. Каждый уровень гарантии это своеобразный компромис между скоростью и уверенностью в обработанном сообщении.
+С каждым уровнем система требует больших проверкок и подтверждений для гарантии, что сообщение было обработано.
+Что влияет на пропусную способность.
+
+Понимание гарантии доставки крайне важные при проектировани IPC. И может выбирать между пропускной способность или гарантией отправки сообщения.
+
+WARNING: Команда разработчиков должна понимать разницу и уметь правильно выбрать необходимый уровень качества доставки.
+
+Для принятия решения важно анализировать бизнес требования функционала:
+
+1. Насколько ценно сообщение?
+2. Можем мы его потерять?
+3. Что делать когда сообщение было утеряно?
+4. Каие действия при системных ошибках следует предпринимать отправителю и/или подписчику?
+
+.At most once (QoS 0)
+В лучшем случае - отправит. Клиент не может знать хоть кто-то прочитает сообщение или нет! Еще называется “best-effort”
+
+Если никто не слушает subject или не активен в момент отправки сообщения - сообщение не будет доставлено.
+
+Такой же уровень гарантии предоставляет TCP/IP.
+
+Ядро отправляет и забывает сообщение. Он держит сообщения только в памяти и никогда не сохраняет их на диск.
+
+Обладает высокой пропускной способностью, т.к. накладные расходы это пропускная способность сети и CPU системы.
+
+.At-least once (QoS 1)
+Клиент получает гарантию, что его сообщение будет сохранено.
+На этом уровне гарантии клиент получает больше возможностей для отслеживания состояния его сообщения: если сообщение не будет отправлено он будет знать, что сообщение не было сохранено в стрим стор и нужно предпринять меры.
+
+.exactly once QoS (QoS 2)
+Ideal when message rates are fairly low and where latency is not a primary concern.
+--
+
+== NATS concept
+* Subject-Based Messaging
+* Core
+* JetStream
+
+[.notes]
+--
+Поговорим о концепте NATS
+--
+
+== Subject-Based Messaging
+`Subject` - fundamental entity of NATS at all. In `Kafka`, `NSQ`, `RabbitMQ` - "topic" naming convention is used.
+
+image:msgsvg2.svg[]
+
+Represent case seinsitive string with one or more words `[a-zA-Z]`  with dot ('.')  separator.
+
+One more thing - where is *Wilecards*: "*" or ">"
+
+[.notes]
+--
+Тема/Обьект/Subject - фундаментальная сущьность NATS. В Кафке, NQS или RabbitMQ - имеет имя "topic"
+
+Представляет собой строку, слова в которой разделены точкой. Важно, что САБЖ чувствителен к регистру и состоит из букв и цифр.
+
+Слова САБЖА разделенные точкой создают своеобразную иерархию.
+
+Важную роль играют сец. символы - *** и *>*
+
+* - заменяет только одно слово, в то время > - заменяет все правее ее, и находится в конце, обычно. > можно использовать,
+к примеру, как систему мониторинга или аудита безопасности. Если подписаться на САБЖ включаюзщий только > можно получать все сообщения из системы.
+Это можно обойти системой ограничений.
+
+Спец. символы могут встречаться несколько раз `*.*.east.>`
+
+Обратите внимание на пример, он хорошо показывает кто из подписчиков получает сообщение[30 sec timeout]
+
+> ЕСТЬ ЛИ ВОПРОСЫ?
 --
 
 == Core
+Basic functionality which provide StateLess functionality with QoS tear 0 -  *At most once*
+
+* Publish-Subscribe
+* Request-Reply
+* Queue Groups
 
 [.notes]
 ****
-Я хочу сразу оговорить, что есть CORE функционал, и комьюнити
-С JetStream появилось несколько особенностей архитектуры, с которой многие разработчики путаются.
+Я хочу сразу оговорить, что есть CORE функционал и это легаси часть NATS вполне жизнеспособна т.к. дает нам *AT most once* гарантию доставки.
+Ей не нужно дисковое хранилище, она крайне быстра т.к. все что нужно ей это в момент получения запроса отправить всем кто подписан сообщение.
+
+С JetStream появилось несколько особенностей архитектуры, с которой многие разработчики путаются. И мне хочется закрыть это недопонимания.
 
 Важно понимать, что JetStream расширяет возможности NATS новым функционалом и это решать разработчику, какой именно механизм ему стоит исползовать.
 ****
+
+=== Publish-Subscribe footnote:[https://www.youtube.com/watch?v=jLTVhP08Tq0]
+
+NATS implements a publish-subscribe message distribution model for one-to-many (Fan-Out) communication.
+
+image:pub-sub.svg[]
+
+.Message
+1. subject
+2. payload
+3. headers
+4. reply (opt)
+
+Message size: *1Mb* by default, recommend up to *8Mb*, can be increased to *64Mb*
+
+[.notes]
+--
+Класическая модель Pub-Sub реализовывает модель распределения - Один ко многим, так же это архитектурный патерн - Fan-Out.
+
+Каждый кто подписан на сообщение и находится в подключенном состоянии получит сообщение.
+
+Важно помнить о размере сообщения, которое по умолчанию имеет ограничение 1Мб, и которое можно расширить до 64, но рекомендуется не больше 8.
+
+Самый на мое усмотрение элемент сообщения - Headers, которые появились в v2.2 и дали возможность использова трасировку,
+без обязательного помещения информации в тело сообщения. Так же, опциональное поле - reply позволяет написать свою реализацию *Request/Reply* функционала.
+--
+
+=== Request-Reply
+Request/Reply approach - Remote procedure call (RPC) via MQ NATS system. This mean it's blocking operation based on pub-sub functionality.
+
+image:req_reply.svg[]
+
+* Publisher put `INBOX` tmp subject into reply field with further waiting reply on it
+
+IMPORTANT: Producers should use *drain before exiting* processing for waiting unanswered messages
+
+[WARNING]
+====
+Remember One-to-Many. This mean all subscriber will get this message. In horizontal scale it can bring to unpredictable behaviour
+====
+
+[.notes]
+--
+У меня этот функционал вызывает спорные чувства.
+
+С одной стороны это Киллер Фича.
+
+Она решает волпросы сервис-дискавери системы, легка в использовании, не требует массы другого функционала для балансировки как в класических протоколах RPC.
+
+Я даже считаю, что использование NATS как-то даже повлияло на его феноменальный рост.
+
+Но с точки зрения архитектуры - это MQ система, и реализаций - сахарное решение и нужно даже сказать, довольно интересное.
+
+Для PIN-UP может даже оказаться, что эта система станет чуть-ли не основной :) Сейчас мы работаем еще над одной системой, которая должна нам дать и сервис-дискавери, и возможность балансироваки http, grpc между сервисам - и это не K8S, над которым мы так же работаем :)
+
+НО, давайте посмотрим как же работает Request/Reply:
+
+Это блокирующая операцию, которая задейсвует подписчиком сперва отправку сообщения и далее - подписку на сообщение, которое он поместил в поле REPLY.
+
+Есть важные моменты:
+
+* Продюсер должен реализовать в обязательном порядке - drain логику
+
+которая просто будет ждать какое-то время все незакрытые хэндлеры. Это особо важно в наших немасштабируемых и in-memory processing системах. Т.к. время дрэйна может быть недостаточно при 100500 рутингах
+
+* Еще важная проблема - это несовсем четкая документация, которая с одной стороны призывает к легкой масштабируемости -
+
+мол, не парьтесь, система через динамические очереди может гарантировать, что 1 сообщение получит только одно подключение.
+И в тоже время, хвастается на то, что запрос могут обрабатывать несколько подписчиков.
+
+Тут многие могут запутаться.
+
+По умолчанию, это так и работает - правило ОДИН-КО-МНОГИМ тут так же работает, никто его не отменял. Поэтому замасштабированные подписчики ВСЕ получат запрос реплики, это может привести к МИЛЛИОНУ проблем.
+
+По этому важно, понимать все возможности NATS и как их использовать!
+
+НАДЕЮСЬ я тут вас уже заинтересовал и вам уже интересно!
+
+> Поднимите руку, кто знает, как решить вопрос с гарантией ОДИН-К-ОДНОМУ ?
+
+--
+=== Queue Groups
 
 == JetStream
 
@@ -270,7 +408,17 @@ authorization {
 JetStream is designed to bifurcate ingestion and consumption of messages to provide multiple ways to consume data from the same stream. To that end, JetStream functionality is composed of server streams that hold data and server consumers that provide a way for applications to access data. Streams and consumers may be provisioned ahead of time, at runtime, and are independently configured to provide the flexibility to balance performance and reliability and create the perfect environment for your business needs.
 
 
-image::streams-and-consumers-75p.png[]
+[autoslide=60000]
+=== Features
+
+* At-least-once delivery and exactly once within a window
+* Store data and replay by time or sequence
+* Wildcard support
+* NATS 2.0 Security aware
+* Data at rest encryption (Version 2.2.3)
+* Cleanse specific messages (General Data Protection Regulation: GDPR)
+* Horizontal scalability
+* Persist Streams and replay via Consumers
 
 === Goals footnote:[A footnote on introduction?!]
 JetStream was developed with the following goals in mind
@@ -318,16 +466,30 @@ image::stream_group.png[ width=40%]
 image::consumer_group.png[ width=40%]
 --
 
-== What expect next?
+=== Streams
+image::streams-and-consumers-75p.png[]
+
+=== Consumers
+
+=== Key/Value Store
+=== Object Store footnote[https://docs.nats.io/nats-concepts/jetstream/obj_store]
+[.notes]
+--
+А вот это еще одна киллер-фича. Которая дает нам настоящее блочное хранилище - S3 в "простонародии".
+
+Она сейчас еще помечена как эксперимент и является частью функционала JetStream
+--
+
+== Subject Mapping and Partitioning footnote:[https://nats.io/blog/nats-server-29-release/]
+v2.9 feature
+
+== Future of Nats
 
 === Release 2.9 footnote:[https://nats.io/blog/nats-server-29-release]
 context
 
 === Road map
 image::roadmap.png[]
-
-== Pin-Up Infrastructure
-image::NATS LEAF-DEV.png[]
 
 == References
 - https://github.com/nats-io/nats.docs/tree/master/running-a-nats-service/configuration[Nats.Docs]
