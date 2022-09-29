@@ -324,10 +324,16 @@ Ideal when message rates are fairly low and where latency is not a primary conce
 * Subject-Based Messaging
 * Core
 * JetStream
+* Subject Mapping and Partitioning
 
 [.notes]
 --
-Поговорим о концепте NATS
+Давайте поговорим об овновных концепта НАТС:
+
+* тематических сообщений
+* ядре
+* стриминг системе
+* ии тематической маршрутизации и пепееаправлении
 --
 
 == Subject-Based Messaging
@@ -408,7 +414,7 @@ Request/Reply approach - Remote procedure call (RPC) via MQ NATS system. This me
 
 image:req_reply.svg[]
 
-* Publisher put `INBOX` tmp subject into reply field with further waiting reply on it
+* Publisher put `INBOX` tmp subject into reply field with further waiting respond on it
 
 IMPORTANT: Producers should use *drain before exiting* processing for waiting unanswered messages
 
@@ -457,7 +463,34 @@ Remember One-to-Many. This mean all subscriber will get this message. In horizon
 > Поднимите руку, кто знает, как решить вопрос с гарантией ОДИН-К-ОДНОМУ ?
 
 --
-=== Queue Groups
+=== Queue Groups footnote:[https://docs.nats.io/nats-concepts/core-nats/queue]
+Combine one or more consumer into group (like Load Balancer) where only one random member get a message. Group have the same naming convention as subject.
+
+IMPORTANT: Queue subscribers are ideal for scaling services.
+
+image:groups.svg[]
+
+NOTE: RabbitMQ, Kafka has the same naming concept - "queue" while NSQ - "chanel"
+
+[.notes]
+--
+Семантически группа - имеет такое же название в RabbitMQ и Kafka. Хотя в NSQ имеет имя - channel.
+
+Она комбинирует один или более подписчиков в единую группу, так называемый лоад балансер. Сама группа имеет те же требования к неймингу, что и subject.
+
+Груповая очередь - важный функционал для микро-сервиса. Без нее невозможно реализовать горизонтальное масштабирование.
+
+Т.к. обычная бизнес задача сервиса - обрабатывать разово каждое пришедшее в сервис сообщения.
+
+А мы уже знаем, что по умолчанию модель доставки ОДИН-КО-МНОГИМ.
+
+Но наш сервис должен быть масштабируемым!!!
+
+Разработчик при подписке должен четко понимать какое требуется поведение его приложение при масштабировании!
+
+Непонимание этого приведет к КАТАСТРОФИЧЕСКИМ последсвиям, особенно в промышленной среде, когда репликация может быть расширена и на 20 и больше копий,
+в то время как на DEV или STAGE среде это приложение может быть всего в одном экземпляре.
+--
 
 === When to use Core NATS footnote:[https://docs.nats.io/using-nats/developer/develop_jetstream#when-to-use-core-nats]
 > Using core NATS is ideal for the fast request path for scalable services where there is tolerance for message loss or when applications themselves handle message delivery guarantees.
