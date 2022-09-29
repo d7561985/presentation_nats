@@ -49,14 +49,18 @@ Something about me
 
 [NOTE.speaker]
 --
-Сами разработчики называют NATS: `сообщения-ориентированным посредником`
+Сами разработчики называют NATS: `сообщения-ориентированным посредником` и я думаю, после того как мы углубимся в теорию вы с этим согласитесь
+
+На высоком уровне натс решает несколько зщадачь:
 
 * Возможно разрабатывать без особого труда распределенные и масштабируемые клиент-сервер приложения
 * Хранить и распространять данные в реальном времени в общем виде
 --
 
+[autoslide=60000]
 === What do you use NATS for?
-You can use NATS to exchange information with and make requests to other applications. You can also use NATS to make your application into a distributed peer-to-peer application.
+You can use NATS to exchange information with and make requests to other applications.
+You can also use NATS to make your application into a distributed peer-to-peer application.
 
 At a high level your application can use NATS to:
 
@@ -66,37 +70,83 @@ At a high level your application can use NATS to:
 * Store shared (consistent) state/data between other applications or instances of your application.
 * Be informed in real-time about any new data being sent, or any changes to the shared state/data.
 
+[.notes]
+--
+Для чего мы можем использовать НАТС?
+
+Конечно же для обмена информацией и запросов с другими приложениями а  так же строить распределенные приложения.
+
+На высоком уровне наши приложения могут:
+
+* отправлять информацию другим приложениям или экзэмплярам нашего приложения.
+* в реальном времени или во время работы приложения получать сообщения от других приложений или экземлпяров нашего приложения.
+(Обратите внимание, что экземпляры - говорит о распределении внутри собсвенного сервиса, когда 1 приложение обшается между своими репликами, хотя я предпочитаю придерживаться практик 12 факторного приложения и использовать WORKER подход, хотя это и есть другой инстанс так же :)
+* Точно так же мы моежм использовать RPC подход.
+* Хранить общие (и постоянные) состояние или данные между другими приложениями или экземплярами нашего.
+* Получать нотифиации об изменениях общих данных или состояний.
+--
+
+[autoslide=60000]
 === Don't worry
 * Who sends the information that you want to receive.
-* Who is interested in the information you are sending to others, or how many are interested or where they are.
-* Where the service you are sending a request to is located, or how many currently active instances of that service there are.
+* Who  is interested in the information you are sending to others, or how many are interested or where they are.
+//* Where the service you are sending a request to is located, or how many currently active instances of that service there are.
 * How many partitions or servers there are in the cluster.
 * Security (just identify yourself).
 * Whether your application is up and running at the time the information is sent or not (using JetStream).
 * Flow control (using JetStream)
-* Higher qualities of services such as exactly-once (using JetStream)
-* Fault-tolerance, and which servers are up or down at any given time.
+* QoS flexibility
+* Fault-tolerance
 * The topology of the NATS server infrastructure or it is architected.
 
-[autoslide=60000]
+[.notes]
+--
+Разработчики предлагают ряд консернов о которых нам предлагают забыть при разработке приложений
+
+* Отправителя агностик - не важно кто отправляет информацию которая вам нужна. Нас не ваолнует где это сервис находится, какой его адрес, какой порт подключения...
+* Получателя агностик - нам не важно кто наши читатели, сколько их и откуда они подуключились.
+* А вот сколько партиций у кластера, все таки это уже устаревший консерн. Тут нас уже волнует какой уровень репликации данных мы хотим использовать.
+* О безопасности, только идентифицируй себя. NATS крайне сильный и обеспокоен безопасностью и поддерживает все необходимое, что бы обезопасить инфраструктуру.
+* Нас не беспокоит даже находятся ли сервисы в онлайне в данный момент времени (JetStream)
+* Мы получаем право выбирать какоу уровень гарантий качества нам неоходим изходя из наших потребностей.
+* Отказоустойчивость
+* Отказ от безпокойства за топологию это интересный момент, т.к. есть определенные неюансы, но на высоком уровне - вы можете отправлять сообщения в любом EDGE локации и ваше сообщение найдет адресата даже через сеть кластеров.
+
+--
+
+[autoslide=30000]
 == Overview
 * Functionality
 * Connectivity
 * Deployment Architectures
 * Security
 
+[.notes]
+--
+Давайте взлянем на функциональные возможности, сопособы подключения, архитектурных топологий и безопасности.
+--
+
+[autoslide=30000]
 === Functionality
 
 * Core
 * JetStream
 
+WARNING: Streaming STAN protocol is  ***Obsolete*** and often appear as legacy documentation page for some developers google offers
+
 [.notes]
 --
-Ядро - базовый функционал, который изначально был разработал и за что мы все полюбили NATS
+С точки зрения функциональных возможностей следует разделять ЯДРО и JetStream.
 
-Стриминг - новый функционал, который расширил возможности, дав нам альтернативу Apache Kafka, которую в первую очередь крайне легко поддерживать и обслуживать.
+Раньше был еще STAN протокол, который стремился повысить уровень гарантий доставки. Это протокол оказался не таким удачным и команда поспешила заменить его более надежным RAFT протоколом.
+Когда мы говорим о стриминге, мы де-факто имеем ввиду JetStream! Прошу это помнить!
+
+Ядро - представляет базовый функционал, который изначально был разработал и за что мы все полюбили NATS
+
+Джет Стриминг - новый функционал, который расширил возможности, дав нам альтернативу Apache Kafka, которую в первую очередь крайне легко поддерживать и обслуживать.
 --
 
+[autoslide=30000]
 === Connectivity footnote:[https://docs.nats.io/nats-concepts/connectivity]
 
 * NATS plain
@@ -104,21 +154,28 @@ At a high level your application can use NATS to:
 * MQTT footnote:MQTT[https://docs.nats.io/running-a-nats-service/configuration/mqtt]
 * WebSocket footnote:WebSocket[https://docs.nats.io/running-a-nats-service/configuration/websocket]
 
+[.notes]
+--
+Подключиться к NATS можно по обычному или защищенному TLS подключению, а так же MQTT протокол широко распространенный в IoT решениях и WebSocket, который в своем представлении не нуждается.
+--
+
+[autoslide=120000]
 === Deployment Architectures footnote:[https://docs.nats.io/nats-concepts/service_infrastructure/adaptive_edge_deployment]
 * Single
 * Cluster footnote:Cluster[https://docs.nats.io/running-a-nats-service/configuration/clustering]
-* Gateway footnote:Gatewat[https://docs.nats.io/running-a-nats-service/configuration/gateways]
-* Leaf footnote:Leaf[https://docs.nats.io/running-a-nats-service/configuration/leafnodes]
+* Super-cluster
+** Gateway cluster propagation protocol footnote:Gatewat[https://docs.nats.io/running-a-nats-service/configuration/gateways]
+** Leaf message propagation Protocol footnote:Leaf[https://docs.nats.io/running-a-nats-service/configuration/leafnodes]
 
 [.notes]
 --
-.Топологя
 Как способ разворачивания, может быть развернута как `single node`, что не HA, в режиме кластера, сурер-кластер GateWay и Leaf протокол, который мы выбрали для построения нашего супер-кластера.
 
 * Single - исключительно дев. окружение самого разработчика
 * Cluster - HA deployment, обычно с 3я нодами, повышает доступность и пропускную способность
-* Gateway - обьединяет несколько кластеров в полную сетку. Кластеры используются для обьединения node, в то время GW - для обьединения кластеров.
-* Leaf - расширяет существующую NATS систему в любом размере. Прозрачно перенаправляют сообщения с локальных клиентво к одной или больше удаленным системам и обратно.
+* Super-cluster
+** Gateway - обьединяет несколько кластеров в полную сетку. Кластеры используются для обьединения node, в то время GW - для обьединения кластеров. Архитектурная цель протокола: Disaster Recovery
+** Leaf - расширяет существующую NATS систему в любом размере. Прозрачно перенаправляют сообщения с локальных клиентво к одной или больше удаленным системам и обратно.
 --
 
 === Security footnote:Authentication[https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro]
