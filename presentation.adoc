@@ -493,14 +493,8 @@ context
 === Road map
 image::roadmap.png[]
 
-== References
-- https://github.com/nats-io/nats.docs/tree/master/running-a-nats-service/configuration[Nats.Docs]
-- https://nats.io/blog/building-scalable-microservices-with-nats/[Building Microservices with NATS]
-- https://docs.nats.io/nats-concepts/jetstream[JetStream], at  https://github.com/nats-io/nats.docs/blob/master/nats-concepts/jetstream/readme.md[Nats.Docs]
-- https://nats.io/blog/nats-whats-new-22/[NATS Server 2.2 Release]
-- https://nats.io/blog/nats-server-29-release/[NATS Server 2.9 Release]
-- https://www.youtube.com/watch?v=HwwvFeUHAyo&t=1s[Benchmark]
-- https://raft.github.io/[RAFT]
+== Presentation url
+image:pres_url.png[width=500]
 
 == Contacts
 icon:envelope[size=lg] d.harupa@pin-up.team
@@ -513,3 +507,4 @@ icon:linkedin[size=lg] https://linkedin.com/in/dzmitry-harupa-332131137
 
 icon:instagram[size=lg] dzmityinv
 
+== Q/A
