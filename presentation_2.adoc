@@ -18,6 +18,8 @@ Development with NATS
 
 by Harupa Dzmitry <d.harupa@pin-up.team>
 
+by Kantemir Zadorozhniy <k.zadorozhniy@pin-up.team>
+
 @2022
 
 == About
@@ -26,18 +28,89 @@ Something about me
 == Agenda
 
 - Pin-Up Infrastructure.(3 min)
-- Development
-* QoS patterns
-* D2
 - Conventions. (2 min)
-* GO development guideline (7 min)
-* Service deployment + gitops. (5 min)
-- Event driven architecture. (<5 min)
+* GO development guideline (7 min) <+Kantemir>
+* APIs <+Kantemir>
+* Service deployment + gitops. (5 min) <+Kantemir>
+- Patterns
+* QoS patterns
+* Event driven architecture / Event modeling :) (<5 min) <+Kantemir>
+* Streaming
+* Best Practices <Kantemir>
+- Development
+* Connecting
+* Receiving Messages
+* Sending Messages
+* JetStream
 
 [autoslide=60000]
-
 == Pin-Up Infrastructure
 image::NATS LEAF-DEV.png[]
+
+== Conventions. (2 min)
+content
+
+=== GO development guideline (7 min)
+[.notes]
+--
+Speaker: Dmitry, <+Kantemir> ADD
+
+NOTE: qqq
+
+WARNING: qqq
+
+IMPORTANT: qwqeqwe
+
+TIP: qqwe
+
+> qwqeqweqwe
+
+****
+wqweqweqwe
+****
+
+.Dmitry
+qweqweqweqwe
+
+.Kantemir
+qweqweqweqw
+--
+
+=== APIs <+Kantemir>
+content
+
+=== Service deployment + gitops. (5 min) <+Kantemir>
+content
+
+== Patterns
+content
+
+=== QoS patterns
+content
+
+=== Event driven architecture / Event modeling :) (<5 min) <+Kantemir>
+content
+
+=== Streaming
+content
+
+=== Best Practices <Kantemir>
+content
+
+== Development
+content
+
+=== Connecting
+content
+
+=== Receiving Messages
+content
+
+=== Sending Messages
+content
+
+=== JetStream
+content
 
 == Contacts
 icon:envelope[size=lg] d.harupa@pin-up.team
