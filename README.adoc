@@ -1,5 +1,9 @@
 = NATS presentation
 
+== Pages
+* https://d7561985.github.io/presentation_nats/presentation_2.html
+* https://d7561985.github.io/presentation_nats/presentation.html
+
 == Setup
 * https://docs.asciidoctor.org/reveal.js-converter/latest/setup/node-js-setup/
 * https://github.com/asciidoctor/asciidoctor-reveal.js/tree/master/examples
@@ -15,7 +19,6 @@ npm i --save asciidoctor @asciidoctor/reveal.js
 ----
 npx asciidoctor-revealjs presentation.adoc
 ----
-
 
 ==  Agenda preliminary
 - Nats.(5 min)

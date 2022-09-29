@@ -13,6 +13,7 @@
 :revealjs_controls: true
 :revealjs_controlsTutorial: true
 :revealjs_totalTime: 2700
+:revealjsdir: .
 
 Development with NATS
 
