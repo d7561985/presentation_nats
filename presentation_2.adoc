@@ -21,10 +21,28 @@ by Harupa Dzmitry <d.harupa@pin-up.team>
 
 by Kantemir Zadorozhniy <k.zadorozhniy@pin-up.team>
 
-@2022
+@{localyear}
 
-== About
-Something about me
+[.columns]
+== About authors
+
+[.column]
+--
+.Harupa Dzmitry
+* >13 years in development
+* >6 years as Go lang dev
+* >5 in Gambling industry (Game dev, Producer, Game Master, Mathematician)
+* Developed 4 games for Booongo (as partners)
+* Performed 5 game maths for IGT
+* Certified Kubernetes Application Developer
+* For now solution architect in Pin-Up company
+--
+
+[.column]
+--
+.Kantemir Zadorozhniy
+NOTE: ToDo
+--
 
 == Agenda
 

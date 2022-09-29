@@ -19,10 +19,26 @@ Introduction for developers
 
 by Harupa Dzmitry <d.harupa@pin-up.team>
 
-@2022
+@{localyear}
 
-== About
-Something about me
+[.columns]
+== About author
+
+[.column]
+--
+* >13 years in development
+* >6 years as Go lang dev
+* >5 in Gambling industry (Game dev, Producer, Game Master, Mathematician)
+* Developed 4 games for Booongo (as partners)
+* Performed 5 game maths for IGT
+* Certified Kubernetes Application Developer
+* For now solution architect in Pin-Up company
+--
+
+[.column]
+--
+image::AVA.jpg[]
+--
 
 == Agenda
 
@@ -178,6 +194,7 @@ WARNING: Streaming STAN protocol is  ***Obsolete*** and often appear as legacy d
 ** Leaf - расширяет существующую NATS систему в любом размере. Прозрачно перенаправляют сообщения с локальных клиентво к одной или больше удаленным системам и обратно.
 --
 
+[autoslide=180000]
 === Security footnote:Authentication[https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro]
 
 * Token
@@ -253,6 +270,7 @@ authorization {
 * Users
 --
 
+[autoslide=120000]
 == Quality of service (QoS) footnote:[https://docs.nats.io/nats-concepts/what-is-nats] footnote:[https://developers.cloudflare.com/pub-sub/learning/delivery-guarantees]
 
 A.K.A: Delivery guarantees or “delivery modes”
@@ -320,6 +338,7 @@ WARNING: Команда разработчиков должна понимать
 Ideal when message rates are fairly low and where latency is not a primary concern.
 --
 
+[autoslide=30000]
 == NATS concept
 * Subject-Based Messaging
 * Core
@@ -336,6 +355,7 @@ Ideal when message rates are fairly low and where latency is not a primary conce
 * ии тематической маршрутизации и пепееаправлении
 --
 
+[autoslide=60000]
 == Subject-Based Messaging
 `Subject` - fundamental entity of NATS at all. In `Kafka`, `NSQ`, `RabbitMQ` - "topic" naming convention is used.
 
@@ -366,6 +386,7 @@ One more thing - where is *Wilecards*: "*" or ">"
 > ЕСТЬ ЛИ ВОПРОСЫ?
 --
 
+[autoslide=60000]
 == Core
 Basic functionality which provide StateLess functionality with QoS tear 0 -  *At most once*
 
@@ -383,6 +404,7 @@ Basic functionality which provide StateLess functionality with QoS tear 0 -  *At
 Важно понимать, что JetStream расширяет возможности NATS новым функционалом и это решать разработчику, какой именно механизм ему стоит исползовать.
 ****
 
+[autoslide=60000]
 === Publish-Subscribe footnote:[https://www.youtube.com/watch?v=jLTVhP08Tq0]
 
 NATS implements a publish-subscribe message distribution model for one-to-many (Fan-Out) communication.
@@ -409,6 +431,7 @@ Message size: *1Mb* by default, recommend up to *8Mb*, can be increased to *64Mb
 без обязательного помещения информации в тело сообщения. Так же, опциональное поле - reply позволяет написать свою реализацию *Request/Reply* функционала.
 --
 
+[autoslide=180000]
 === Request-Reply
 Request/Reply approach - Remote procedure call (RPC) via MQ NATS system. This mean it's blocking operation based on pub-sub functionality.
 
@@ -463,6 +486,8 @@ Remember One-to-Many. This mean all subscriber will get this message. In horizon
 > Поднимите руку, кто знает, как решить вопрос с гарантией ОДИН-К-ОДНОМУ ?
 
 --
+
+[autoslide=120000]
 === Queue Groups footnote:[https://docs.nats.io/nats-concepts/core-nats/queue]
 Combine one or more consumer into group (like Load Balancer) where only one random member get a message. Group have the same naming convention as subject.
 
@@ -492,6 +517,7 @@ NOTE: RabbitMQ, Kafka has the same naming concept - "queue" while NSQ - "chanel"
 в то время как на DEV или STAGE среде это приложение может быть всего в одном экземпляре.
 --
 
+[autoslide=60000]
 === When to use Core NATS footnote:[https://docs.nats.io/using-nats/developer/develop_jetstream#when-to-use-core-nats]
 > Using core NATS is ideal for the fast request path for scalable services where there is tolerance for message loss or when applications themselves handle message delivery guarantees.
 
@@ -533,12 +559,12 @@ WARNING: Надеяться на то, что NATS будет заниматьс
 Я расцениваю это как анти-патерн - т.к. `все что может произойти, произойдет`, исключение - распил монолита. Первая стадия - изоляция компонентов через брокер, тут наш сервис является и подписчиком и продюсером.
 --
 
+[autoslide=60000]
 == JetStream
 
 > NATS has a built-in distributed persistence system called JetStream which enables new functionalities and higher qualities of service on top of the base 'Core NATS' functionalities and qualities of service.
 
 JetStream is designed to bifurcate ingestion and consumption of messages to provide multiple ways to consume data from the same stream. To that end, JetStream functionality is composed of server streams that hold data and server consumers that provide a way for applications to access data. Streams and consumers may be provisioned ahead of time, at runtime, and are independently configured to provide the flexibility to balance performance and reliability and create the perfect environment for your business needs.
-
 
 [autoslide=60000]
 === Features
@@ -552,6 +578,7 @@ JetStream is designed to bifurcate ingestion and consumption of messages to prov
 * Horizontal scalability
 * Persist Streams and replay via Consumers
 
+[autoslide=60000]
 === Goals footnote:[A footnote on introduction?!]
 JetStream was developed with the following goals in mind
 
@@ -566,6 +593,7 @@ JetStream was developed with the following goals in mind
 * The system must display payload agnostic behavior.
 * The system must not have third party dependencies.
 
+[autoslide=60000]
 [.columns.wrap]
 === RAFT footnote:[https://docs.nats.io/running-a-nats-service/configuration/clustering/jetstream_clustering] footnote:[https://raft.github.io/]
 [.column.is-one-third.has-text-justified]
