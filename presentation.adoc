@@ -155,7 +155,7 @@ IMPORTANT: Jetstream аккаунт не может быть системным.
 
 > Subject Alternative Name (SAN) maps to a user. It will search all email addresses first, then all DNS names. If no user could be found, it will try the certificate subject.
 
-[source,yaml]
+[source]
 ----
 Certificate:
 ...
@@ -402,6 +402,46 @@ Remember One-to-Many. This mean all subscriber will get this message. In horizon
 --
 === Queue Groups
 
+=== When to use Core NATS footnote:[https://docs.nats.io/using-nats/developer/develop_jetstream#when-to-use-core-nats]
+> Using core NATS is ideal for the fast request path for scalable services where there is tolerance for message loss or when applications themselves handle message delivery guarantees.
+
+[.text-left]
+--
+These include:
+
+* Service patterns where there is a tightly coupled request-reply where app handle error cases upon timeout
+
+WARNING: Relying on a messaging system to resend here is
+considered an *anti-pattern*
+
+* Where only the last message received is important and new messages will
+be received frequently enough for applications to tolerate a lost message.
+* Message TTL is low
+* The expected consumer set for a message is available a-priori and consumers
+are expected to be live. The request-reply pattern works well here or
+consumers can send an application level acknowledgement.
+--
+
+[.notes]
+--
+Когда же можно использовать функционал ЯДРА?
+
+Кор функционал идеален для быстрых запросов для масштабируемых сервисов с допуском потери сообщения или  обеспечения надежности на уровне приложения.
+
+Это включает:
+
+* Сервисный патерн "Тесной-связанности" - Request/Reply - где очевидна потеря сообщения и приложение может отслеживать переотправку сообщения
+В нашей микросервисной архитектуре, это ЗЛО, с которым мы должны бороться и рассматривать его использование, только в крайних случаях.
+
+WARNING: Надеяться на то, что NATS будет заниматься переотправкой - это анти-патерн!
+
+[.text-left]
+* Когда важно только последнее сообщение и новые сообщения отправляются довольно часто, что бы приложения мерилось с потерей сообщений.
+* Время жизни сообщения мало - данные быстро деградируют или быстро становятся не актуальными.
+Это могут быть поток рыночных котировок, большой обмен сообщениями в системе контроля сервисами или телеметрия оборудования.
+* Потребитель живет а-приори и ожидается, что консьюмер живет.
+Я расцениваю это как анти-патерн - т.к. `все что может произойти, произойдет`, исключение - распил монолита. Первая стадия - изоляция компонентов через брокер, тут наш сервис является и подписчиком и продюсером.
+--
 
 == JetStream
 
@@ -471,15 +511,65 @@ image::consumer_group.png[ width=40%]
 === Streams
 image::streams-and-consumers-75p.png[]
 
+[.notes]
+--
+Эта информация у меня может получиться эмоциональной. Т.к. дизайн стрима противоречик как: Event Driven Designs и Event Modeling вместе взятым.
+
+Что это значит? Сущьность продюсера - это консьюмер агностик.
+Мы являемся распространителем Доменных событий  и мы несем информацию в свет, эта информация может потребляться совершенно разными способами и использоваться по разному.
+
+Это дает гибкость архитектуре. Это позволяет ее развивать независисо - один раз написав сообщение отправке ставок, его могут читать как сервис аналитики, так и новые компоненты - нам не нужно привлекать команду сервиса ставок, что бы они нам помогли наладить комуникацию, т.к. она едина.
+
+Такой подход даже сохраняет трафик сети - т.к. не требуется дублировать его. Потребитель прочитает сообщение и возьмет что ему нужно.
+
+Но все ли плохо? Давайте посмотрим.
+
+--
+
 === Consumers
 
 === Key/Value Store
-=== Object Store footnote[https://docs.nats.io/nats-concepts/jetstream/obj_store]
+=== Object Store footnote:[https://docs.nats.io/nats-concepts/jetstream/obj_store]
 [.notes]
 --
 А вот это еще одна киллер-фича. Которая дает нам настоящее блочное хранилище - S3 в "простонародии".
 
 Она сейчас еще помечена как эксперимент и является частью функционала JetStream
+--
+
+=== When to use streaming footnote:[https://docs.nats.io/using-nats/developer/develop_jetstream#when-to-use-streaming]
+Streaming is ideal when:
+
+* A historical record of a stream is required. This is when a replay of data is required by a consumer.
+* The last message produced on a stream is required for initialization and the producer may be offline.
+* A-priori knowledge of consumers is not available, but consumers must receive messages. This is often a false assumption.
+* Data producers and consumers are highly decoupled. They may be online at different times and consumers must receive messages.
+* The data in messages being sent have a lifespan beyond that of the intended application lifespan.
+* Applications need to consume data at their own pace.
+* You want de-coupled flow control between the publishers and the consumers of the stream
+* You need 'exactly-once' quality of service with de-duplication of publications and double-acknowledged consumption
+
+NOTE: that no assumptions should ever be made of who will receive and process data in the future, or for what purpose.
+
+[.notes]
+--
+Давайте рассмотрим для чего сами разработчики рекомендуют использовать стриминг
+
+Стриминг идеален:
+
+* Требуются исторические записи потока. Это когда консьюмер требует чтение исторических данных. Т.е. в начале когда команда не получила эту информацию и считает, что им не нужно чтение исторических данных, можно и TTL заюзать? А что делать когда появится?
+* Когда требуется последнее отправленное сообщение, а отправитель может быть оффлайн - это может быть просто JOBa, а возможно и нормальное архитектурная микросервисная практика - что сервисы падают и это нормально.
+* Мы не знаем о потребителях ничего, но знаем что они должны получать сообщения. Для меня это анти-патерн на основе EDA и EM. Философия Event Driven - агностичность! Есть читатель или нет - продюсера это не волнует.
+* Сильно разделенные продюсеры и консьюмеры - Могут находиться в сети в разное время.
+* Время жизни отправленного сообщение уходит далеко за существование самого сервиса. Тут намекают на serverless подход ну или опять же JOB/CRON патерн.
+* Приложения должны обрабатывать запросы в собсвенном темпе - в случае с At most once MQ очень зависить от общей мощности потребителей и из-за этого страдаем пропускная способность.
+Эта важная MQ характеристика. Этого буфера раньше не было в NATS  (CORE) и из-за этого можно было считать его не полноценной MQ. Этот буфер позволяет не держать большой штат мощности, а гарантировать обработку ВСПЛЕСКА запросов! ВСЕ будут обработаны! ЭТО ОЧЕНЬ КРИТИЧНО ВАЖНО!
+* Требуется патерт - Flow Control, где важно управлять количеством паралельно отправляемых и получаемых сообзщений. Можно сказать, можно сделать что-то на подобие распределенного мастер патерна.
+* И конечно же де-дубликация отправленных сообщений и двойное подтверждение потребителями.
+
+Хочется обобщить - БУФЕР и Гаратнии доставки!
+
+Это тяжелый раздел, все ли понятно, есть ли вопросы?
 --
 
 == Subject Mapping and Partitioning footnote:[https://nats.io/blog/nats-server-29-release/]
