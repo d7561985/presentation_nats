@@ -21,6 +21,22 @@ by Harupa Dzmitry <d.harupa@pin-up.team>
 
 @{localyear}
 
+[.notes]
+--
+Это 1-я часть серии докладов посвященной НАТСУ
+
+ВАЖНО: https://t.me/GolangPresentationBot все должны зайти по ссылке и зарегистрироваться через корпоритивную почту
+
+На протяжении доклада я буду прерываться на 1 минут, для запуска квиз.
+
+Прошу относится к голосованию серьезно!
+--
+
+[%notitle]
+== Quiz
+
+Quiz
+
 [.columns]
 == About author
 
@@ -49,21 +65,18 @@ image::AVA.jpg[]
 - NATS concept
 * Subject-Based Messaging
 * Core
-* JetStream
-* Subject Mapping and Partitioning
-- Future of NATS
 - Q/A
 
 [NOTE.speaker]
 --
-Мы пройдемся по высокоуровнему дизайну натсу и его ключевым особенностям.
+Мы пройдемся по высокоуровнему дизайну натсу и его ключевым особенностям - CORE
 
-Рассмотрим основные концепции MQ и рассмотрим что нового нам готовят новые версии НАТС или что интересного было недавно добавлено.
+Рассмотрим основные концепции MQ и рассмотрим что нового нам готовят новые версии НАТС.
 
 В конце доклада у нас будет 15 минут на ваши вопросы. Я буду стараться уложиться в 45 минут!
 --
 
-[autoslide=60000]
+[autoslide=120000]
 == NATS
 > message oriented middleware
 
@@ -82,9 +95,11 @@ image::AVA.jpg[]
 
 * Возможно разрабатывать без особого труда распределенные и масштабируемые клиент-сервер приложения
 * Хранить и распространять данные в реальном времени в общем виде
+
+INFO: TELEGRAM VOTE
 --
 
-[autoslide=60000]
+[autoslide=120000]
 === What do you use NATS for?
 You can use NATS to exchange information with and make requests to other applications.
 You can also use NATS to make your application into a distributed peer-to-peer application.
@@ -108,12 +123,14 @@ At a high level your application can use NATS to:
 * отправлять информацию другим приложениям или экзэмплярам нашего приложения.
 * в реальном времени или во время работы приложения получать сообщения от других приложений или экземлпяров нашего приложения.
 (Обратите внимание, что экземпляры - говорит о распределении внутри собсвенного сервиса, когда 1 приложение обшается между своими репликами, хотя я предпочитаю придерживаться практик 12 факторного приложения и использовать WORKER подход, хотя это и есть другой инстанс так же :)
-* Точно так же мы моежм использовать RPC подход.
+* Точно так же мы моежем использовать RPC подход.
 * Хранить общие (и постоянные) состояние или данные между другими приложениями или экземплярами нашего.
 * Получать нотифиации об изменениях общих данных или состояний.
+
+INFO: TELEGRAM VOTE
 --
 
-[autoslide=60000]
+[autoslide=120000]
 === Don't worry
 * Who sends the information that you want to receive.
 * Who  is interested in the information you are sending to others, or how many are interested or where they are.
@@ -139,9 +156,10 @@ At a high level your application can use NATS to:
 * Отказоустойчивость
 * Отказ от безпокойства за топологию это интересный момент, т.к. есть определенные неюансы, но на высоком уровне - вы можете отправлять сообщения в любом EDGE локации и ваше сообщение найдет адресата даже через сеть кластеров.
 
+INFO: TELEGRAM VOTE
 --
 
-[autoslide=30000]
+//[autoslide=30000]
 == Overview
 * Functionality
 * Connectivity
@@ -150,10 +168,10 @@ At a high level your application can use NATS to:
 
 [.notes]
 --
-Давайте взлянем на функциональные возможности, сопособы подключения, архитектурных топологий и безопасности.
+Пройдемся по ключевому функционалу
 --
 
-[autoslide=30000]
+[autoslide=120000]
 === Functionality
 
 * Core
@@ -186,7 +204,7 @@ WARNING: Streaming STAN protocol is  ***Obsolete*** and often appear as legacy d
 Подключиться к NATS можно по обычному или защищенному TLS подключению, а так же MQTT протокол широко распространенный в IoT решениях и WebSocket, который в своем представлении не нуждается.
 --
 
-[autoslide=120000]
+//[autoslide=120000]
 === Deployment Architectures footnote:[https://docs.nats.io/nats-concepts/service_infrastructure/adaptive_edge_deployment]
 * Single
 * Cluster footnote:Cluster[https://docs.nats.io/running-a-nats-service/configuration/clustering]
@@ -205,7 +223,7 @@ WARNING: Streaming STAN protocol is  ***Obsolete*** and often appear as legacy d
 ** Leaf - расширяет существующую NATS систему в любом размере. Прозрачно перенаправляют сообщения с локальных клиентво к одной или больше удаленным системам и обратно.
 --
 
-[autoslide=180000]
+//[autoslide=240000]
 === Security footnote:Authentication[https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro]
 
 * Token
@@ -216,12 +234,19 @@ WARNING: Streaming STAN protocol is  ***Obsolete*** and often appear as legacy d
 
 [.notes]
 --
-.Безопасность
-Важно понимать разницу между аккаунт и пользователь. Аккаунт - это просто субсет пользователей с рязом высокоуровневых различий.
+Прежде чем говорить о акаунтах пользователей, нужно немного разобраться о роли Акаунта и Пользователя.
+
+Важно понимать разницу между аккаунтои и пользователь.
+
+Аккаунт - это просто субсет пользователей с рязом высокоуровневых различий.
 
 > Accounts allow the grouping of clients, isolating them from clients in other accounts, thus enabling multi-tenancy in the server. With accounts, the subject space is not globally shared, greatly simplifying the messaging environment. Instead of devising complicated subject name carving patterns, clients can use short subjects without explicit authorization rules. System Events are an example of this isolation at work.
 
-Аккаунт строго разделяется на системный и обычный. Так же аккаунт обязательно должен иметь включенную опцию *jetstream*, без нее все пользователи будут использовать только CORE функционал
+Различия - системный или обычный.
+
+Системный аккаунт - акаунт мониторинга и репортинга, в то время обычный - это работчая группа, куда разработчики и подключаются
+
+Так же аккаунт обязательно должен иметь включенную опцию *jetstream*, без нее все пользователи будут использовать только CORE функционал
 
 IMPORTANT: Jetstream аккаунт не может быть системным.
 
@@ -280,6 +305,11 @@ authorization {
 * Accounts
 * Users
 --
+
+[%notitle]
+== Quiz
+
+Quiz
 
 [autoslide=120000]
 == Quality of service (QoS) footnote:[https://docs.nats.io/nats-concepts/what-is-nats] footnote:[https://developers.cloudflare.com/pub-sub/learning/delivery-guarantees]
@@ -349,7 +379,12 @@ WARNING: Команда разработчиков должна понимать
 Ideal when message rates are fairly low and where latency is not a primary concern.
 --
 
-[autoslide=30000]
+[%notitle]
+== Quiz
+
+Quiz
+
+[autoslide=60000]
 == NATS concept
 * Subject-Based Messaging
 * Core
@@ -360,13 +395,13 @@ Ideal when message rates are fairly low and where latency is not a primary conce
 --
 Давайте поговорим об овновных концепта НАТС:
 
-* тематических сообщений
-* ядре
+* концепт subject
+* КОР функционале
 * стриминг системе
-* ии тематической маршрутизации и пепееаправлении
+* ии subject маршрутизации и пепееаправлении, это функцонал v2.9 патча и к сожалению мы его не сможем покрыть
 --
 
-[autoslide=60000]
+[autoslide=120000]
 == Subject-Based Messaging
 `Subject` - fundamental entity of NATS at all. In `Kafka`, `NSQ`, `RabbitMQ` - "topic" naming convention is used.
 
@@ -393,11 +428,9 @@ One more thing - where is *Wilecards*: "*" or ">"
 Спец. символы могут встречаться несколько раз `*.*.east.>`
 
 Обратите внимание на пример, он хорошо показывает кто из подписчиков получает сообщение[30 sec timeout]
-
-> ЕСТЬ ЛИ ВОПРОСЫ?
 --
 
-[autoslide=60000]
+//[autoslide=60000]
 == Core
 Basic functionality which provide StateLess functionality with QoS tear 0 -  *At most once*
 
@@ -442,7 +475,7 @@ Message size: *1Mb* by default, recommend up to *8Mb*, can be increased to *64Mb
 без обязательного помещения информации в тело сообщения. Так же, опциональное поле - reply позволяет написать свою реализацию *Request/Reply* функционала.
 --
 
-[autoslide=180000]
+//[autoslide=180000]
 === Request-Reply
 Request/Reply approach - Remote procedure call (RPC) via MQ NATS system. This mean it's blocking operation based on pub-sub functionality.
 
@@ -495,10 +528,14 @@ Remember One-to-Many. This mean all subscriber will get this message. In horizon
 НАДЕЮСЬ я тут вас уже заинтересовал и вам уже интересно!
 
 > Поднимите руку, кто знает, как решить вопрос с гарантией ОДИН-К-ОДНОМУ ?
-
 --
 
-[autoslide=120000]
+[%notitle]
+== Quiz
+
+Quiz
+
+//[autoslide=120000]
 === Queue Groups footnote:[https://docs.nats.io/nats-concepts/core-nats/queue]
 Combine one or more consumer into group (like Load Balancer) where only one random member get a message. Group have the same naming convention as subject.
 
@@ -571,307 +608,11 @@ WARNING: Надеяться на то, что NATS будет заниматьс
 --
 
 [autoslide=60000]
-== JetStream
 
-> NATS has a built-in distributed persistence system called JetStream which enables new functionalities and higher qualities of service on top of the base 'Core NATS' functionalities and qualities of service.
+[%notitle]
+== Quiz
 
-[.notes]
---
-JetStream
-
-Протокол стан не дал желаемого результата, там было очень много проблем, однако, NATS хотел предложить облачной аудитории именно облачную систему событи, но с более высокими гарантиями доставки.
-
-Он разделяет потребление и отправку сообщение, предоставляя большое разнообризие возможностей потребления одного стрима.
-
-Состоит из стрим сервера, которых хранит данные и сервера потребителя, которому эти сохраненные данные предоставляются.
-
-Как стримы так и консьюмеры могут быть созданы заранее (что мы и требует с нашим GitOps подходом) и независимо. Что предоставляет гибкость в балансе между производительностью и надежность.
---
-
-[autoslide=60000]
-=== Goals footnote:[A footnote on introduction?!]
-JetStream was developed with the following goals in mind
-
-[%step]
-* The system must be easy to configure and operate and be observable.
-* The system must be secure and operate well with NATS 2.0 security models.
-* The system must scale horizontally and be applicable to a high ingestion rate.
-* The system must support multiple use cases.
-* The system must self-heal and always be available.
-* The system must have an API that is closer to core NATS.
-* The system must allow NATS messages to be part of a stream as desired.
-* The system must display payload agnostic behavior.
-* The system must not have third party dependencies.
-
-[.notes]
---
-Какие же цели создатели возложили на свое детище,
-
-* Система должна быть проста в настройке, обслуживании и мониторинге
-* Система должна соответсвовать стандарту безопасности NATS 2.0
-* Система должна горизонтально масштабироваться и быть готовой к высокой пропускной способности
-* Должна поддерживать разнообразные сценарии использования
-* Система должна быть HA, что включает и само-лечение
-* API должно быть близкий к CORE
-* CORE сообщения должны быть частью системы стриминга
-* Независимая модель типов передачи данных
-* Без внещних зависимостей от других продуктов
-
---
-
-[autoslide=180000]
-[.columns.wrap]
-=== RAFT footnote:[https://docs.nats.io/running-a-nats-service/configuration/clustering/jetstream_clustering] footnote:[https://raft.github.io/]
-[.column.is-one-third.has-text-justified]
---
-*Meta Group* - all servers join the Meta Group and the JetStream API is managed by this group. A leader is elected and this owns the API and takes care of server placement.
---
-
-[.column.is-one-third.has-text-justified]
---
-*Stream Group* - each Stream creates a RAFT group, this group synchronizes state and data between its members. The elected leader handles ACKs and so forth, if there is no leader the stream will not accept messages.
---
-
-[.column.is-one-third.has-text-justified]
---
-*Consumer Group* - each Consumer creates a RAFT group, this group synchronizes consumer state between its members. The group will live on the machines where the Stream Group is and handle consumption ACKs etc. Each Consumer will have their own group.
---
-
-[.column.is-one-third]
---
-image::meta_group.png[ width=40%]
---
-
-[.column.is-one-third]
---
-image::stream_group.png[ width=40%]
---
-
-[.column.is-one-third]
---
-image::consumer_group.png[ width=40%]
---
-
-[.notes]
---
-Для понимания работы системы, думаю важно понимать сам протокол RAFT который используется JetStream.
-
-Сам протокол оптимизирован, т.к. обычный протокол использует большое количество трафика.
-
-Разработчики скрестили сообщения репликации с протоколом, который обеспечивает консенсус нод.
-
-Что такое консенсус? RAFT протокол это разновидность патерна мастера или лидера в распределенной системе, когда системно-важные операции требуется выполнять единоразово.
-
-Этот протокол позволяет отслеживать доступность остальных участников кластера и имеет ряд процедур само-восстановления, которые позволяют продолжать выполнять задачи, когда один участник или несколко были утеряны.
-
-Формула консолидации или минимальное количество живых нод:  1/2 cluster size + 1. Иными словами, если кластер из 3 нод потеряет 1  - система будет работать дальше.
-
-Рекомендуется: 3 или 5 нодный кластер, в случае 5 нод - может отпасть 2 для продолжения работоспособности, больше нод - генерируют очень большое количество трафика.
-
-Так же стоит понимать, что чем больше реплик стрима - тем дольше мы будем получать подтверждение!
-
-И тут важно обратить внимание уже на то, что у ДжетСтрима не простой протокол рафта.
-
-Точнее, каждый стрим имеет свою отдельную группу RAFT со своим лидером!!
-
-Более того, каждый консьюмер, точно так же имеет отдельную группу, но живут они на серверах где разместились реплики!
-
-Так достигается высокое распределение нагрузки между нодами, в случае большого количества стримов и консьюмеров и они не будут перегружать друг друга.
-
-Существует еще одина дополнительная группа - META. ВСЕ сервера к ней подключаются и она заведует JS API и размещении серверов.  Тут я могу добавить предположение - что эта группа выбирает на каких нодах создать стрим, но вот как она принимает участие в самой работе сообщений, тут вопрос пока у меня стоит открытым.
-
-В дополнении, я рекомендую вам посетить ресурс - https://raft.github.io/ который крайне наглядно продемонстрирует работу этого протокола.
---
-
-[autoslide=250000]
-=== Streams
-image::streams-and-consumers-75p.png[]
-
-[.notes]
---
-И что же такое стрим?
-
-Это хранилище сообщений, где каждое ранилище определяет какие сообщения в нем хранить и какие лимиты хранения - длительность, размер или актуальность.
-
-Стрим может потреблять как обычные сообщения из ЯДРА, если не трубется подтверждение, так и через протокол  JS с блокирующей операцией о записи в стрим.
-
-WARNING: Но.... кажется, что-то тут не сходится? Уже сейчас, кто из вас использует стриминг и может возмутиться!
-
-Эта информация у меня может получиться эмоциональной!
-
-Т.к. дизайн стрима противоречик как: Event Driven Designs и Event Modeling вместе взятым.
-
-Так что это значит?
-
-Сущьность продюсера - это консьюмер агностик.
-
-Продюсер являемся распространителем Доменных событий  и ОН несем информацию в свет, эта информация может потребляться совершенно разными способами и использоваться по разному.
-
-Это дает гибкость архитектуре. Это позволяет ее развивать независимо!
-
-К примеру, один раз написав сообщение при отправке "ставок", его могут читать как сервис аналитики, так и новые компоненты, которых даже еще не существует на момент создания отправки этого сообщения.
-
-И другим коммандам не нужно привлекать команду сервиса "ставок", что бы они им помогли наладить комуникацию, т.к. она едина и понятна.
-
-Благодаря единому хранилищу API и единой конвенции, каждая команда понимает, где находится находится эта документация и ВПРАВЕ ее использовать для своих целей.
-
-Такой подход даже сохраняет трафик сети - т.к. не требуется дублировать его. Потребитель прочитает сообщение и возьмет что ему нужно. Не нужно повторно отправляю и дублировать одну и ту же информацию.
-
-INFO: ПАУЗА
-
-Теперь возвращаемся еще раз к описанию стримов.
-
-Меня давно волновал вопрос о эффективности хранения данных в стриме!
-
-По факту, "можно же" создать ряд стримов, которые будут хранить одни и те же данные. Однако, нет - на низком уровне запрещено это делать, это я узнал совсем недавно!
-
-Итак, какие есть проблемы:
-
-1) Если продюсер хочем получить гарантию доставки в стрим - ему нужно знать имя стрима, что убирает агностичность отправки.
-> Мы можем использовать повышенную гарантию доставки, в случае разработки SAGA патернов внутри одного кластера, но не в Event Driven Design.
-Но ВЫ должны задать вопрос - как поведут Leaf сообщения, в других кластерах, если там будут такие же подписки !
-
-2) Как мы можем использовать повышенный уровень доставки, в случае сообщений между кластерами?
-Ответ: Event Driven не требует гарантии записи в стрим, это требуют SAGA патерны - оркестрация, в то время хореография - допускает.
-
-3) Нужен ли нам Exactly-once при отправке вообще?
-Ответ: Если мы делаем дедубликацию на стороне сервиса - нет, при условии, при Event Driven  Design этого достаточно, при Saga - есть вопросы, т.к в этом случае мы понимаем конечный результат.
-
-Уффф...
-
-Это очень тяжелая концепция, я даже подозреваю, у многи из вас появилось только больше вопросов или же вы хотите что-то дополнить?
-
-TIP: Давайте проведедм голосование в нашем телеграм боте!
---
-
-[autoslide=180000]
-=== Functionalities enabled by JetStream footnote:[https://docs.nats.io/nats-concepts/jetstream]
-* Streaming: temporal decoupling between the publishers and subscribers
-* Replay policies
-* Retention policies and limits
-* Persistent distributed storage
-* Stream replication factor
-* Mirroring between streams
-* De-coupled flow control
-* Exactly once semantics
-
-[.notes]
---
-
---
-
-=== Consumers
-
-=== Key/Value Store
-=== Object Store footnote:[https://docs.nats.io/nats-concepts/jetstream/obj_store]
-[.notes]
---
-А вот это еще одна киллер-фича. Которая дает нам настоящее блочное хранилище - S3 в "простонародии".
-
-Она сейчас еще помечена как эксперимент и является частью функционала JetStream
---
-
-=== When to use streaming footnote:[https://docs.nats.io/using-nats/developer/develop_jetstream#when-to-use-streaming]
-Streaming is ideal when:
-
-* A historical record of a stream is required. This is when a replay of data is required by a consumer.
-* The last message produced on a stream is required for initialization and the producer may be offline.
-* A-priori knowledge of consumers is not available, but consumers must receive messages. This is often a false assumption.
-* Data producers and consumers are highly decoupled. They may be online at different times and consumers must receive messages.
-* The data in messages being sent have a lifespan beyond that of the intended application lifespan.
-* Applications need to consume data at their own pace.
-* You want de-coupled flow control between the publishers and the consumers of the stream
-* You need 'exactly-once' quality of service with de-duplication of publications and double-acknowledged consumption
-
-NOTE: that no assumptions should ever be made of who will receive and process data in the future, or for what purpose.
-
-[.notes]
---
-Давайте рассмотрим для чего сами разработчики рекомендуют использовать стриминг
-
-Стриминг идеален:
-
-* Требуются исторические записи потока. Это когда консьюмер требует чтение исторических данных. Т.е. в начале когда команда не получила эту информацию и считает, что им не нужно чтение исторических данных, можно и TTL заюзать? А что делать когда появится?
-* Когда требуется последнее отправленное сообщение, а отправитель может быть оффлайн - это может быть просто JOBa, а возможно и нормальное архитектурная микросервисная практика - что сервисы падают и это нормально.
-* Мы не знаем о потребителях ничего, но знаем что они должны получать сообщения. Для меня это анти-патерн на основе EDA и EM. Философия Event Driven - агностичность! Есть читатель или нет - продюсера это не волнует.
-* Сильно разделенные продюсеры и консьюмеры - Могут находиться в сети в разное время.
-* Время жизни отправленного сообщение уходит далеко за существование самого сервиса. Тут намекают на serverless подход ну или опять же JOB/CRON патерн.
-* Приложения должны обрабатывать запросы в собсвенном темпе - в случае с At most once MQ очень зависить от общей мощности потребителей и из-за этого страдаем пропускная способность.
-Эта важная MQ характеристика. Этого буфера раньше не было в NATS  (CORE) и из-за этого можно было считать его не полноценной MQ. Этот буфер позволяет не держать большой штат мощности, а гарантировать обработку ВСПЛЕСКА запросов! ВСЕ будут обработаны! ЭТО ОЧЕНЬ КРИТИЧНО ВАЖНО!
-* Требуется патерт - Flow Control, где важно управлять количеством паралельно отправляемых и получаемых сообзщений. Можно сказать, можно сделать что-то на подобие распределенного мастер патерна.
-* И конечно же де-дубликация отправленных сообщений и двойное подтверждение потребителями.
-
-Хочется обобщить - БУФЕР и Гаратнии доставки!
-
-Это тяжелый раздел, все ли понятно, есть ли вопросы?
---
-
-== Subject Mapping and Partitioning footnote:[https://nats.io/blog/nats-server-29-release/]
-v2.9 feature
-
-* Reduced time and bandwidth for replication catch-up
-* Improved message distribution for multi-subscription pull consumers
-* Inactive threshold for durable consumers
-* GetLastMsg
-* AllowDirect, MirrorDirect
-* 
-* Message republishing
-
-image:pull-fetch-prior29.jpg[]
-
-'''
-
-image:pull-fetch-29.jpg[]
-
-'''
-
-image:direct-get.jpg[]
-
-[.notes]
---
-Версия v2.9 настолько большая, что для нее написали целую статью в блоге.
-
-И... действительно, это так, тут есть много интересного
-
-WARNING: что go библиотека должна быть обновлена до  v1.1.17!
-
-.Reduced time and bandwidth for replication catch-up
-Я считаю, только ради этой фичи нужно задуматься о переходе на нее, хотя уже появился стабильная v2.9.2 и почему бы и нет.
-
-В реалиях продакшна, когда в стриме большие данные и поднимается нода, которой требуется наверстать все данные - алгоритм репликации может существенно повлиять на сетевую инфраструктуру, существенно деградирую сетевую пропускную способность.
-В 2.9 появился параметр лимита пропускной способности - `jetstream.max_outstanding_catchup` а так же - компрессия!
-
-.Improved message distribution for multi-subscription pull consumers
-Еще одна феноменальная фича, для уже актуально для горизонтально масштабируемых систем - на слайде я надеюсь вмем понятно преимущество, мне только не ясно почему так долго такой беспредел вообще был... печально и радосно :)
-
-.Inactive threshold for durable consumers
-Расширение параметра `InactiveThreshold`  не только на эфимерные консьюмеры, но и долговечные.
-
-Для тех кто не знает, что такое, эфимерный консьюмер - временные консьюмеры с ограниченным временем жизни. Чтобы его создать в клиенте вызываем  `SubscribeSync` в интерфейса JS:
-Эфимерных консьюмеров - они у нас запрещены, т.к. мы стараемся контролирова декларативно всех потребителей.
-Однако, возможно для некоторых задач это будет актуально и по этому, я считаю, что вы как минимум об это знать.
-
-За что отвечает библиотека клиента:
-
-* Ищет патерны сабджектов в стримах
-* Создает безимянный консьюмер
-* И осуществлет подписку
-
-.GetLastMsg
-Client API Возможность получить последнее сообщение в стриме по сабджу
-
-.AllowDirect MirrorDirect
-Стрим настройка позволяет выполнять GET операции в стриме не только лидером, но и репликами...
-
---
-
-== Future of Nats
-
-=== Release 2.9 footnote:[https://nats.io/blog/nats-server-29-release]
-context
-
-=== Road map
-image::roadmap.png[]
+Quiz
 
 == Presentation url
 image:pres_url.png[width=500]
